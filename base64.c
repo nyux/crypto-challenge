@@ -8,10 +8,36 @@
 
 void base64_convert(char a, char b, char c)
 {
-    printf("%d", (a & 0xFC) >> 2);
-    printf("%d", (a & 0x02) << 4 | (b & 0xF0 >> 4));
-    printf("%d", (b & 0x0F) << 2 | (c & 0xC0) >> 2);
-    printf("%d", c & 0x3F);
+    int i;
+    int output[4];
+
+    output[0] = (a & 0xFC) >> 2;
+    output[1] = (a & 0x02) << 4 | (b & 0xF0 >> 4);
+    output[2] = (b & 0x0F) << 2 | (c & 0xC0) >> 2;
+    output[3] = c & 0x3F;
+
+    for (i = 0; i < 3; i++)
+    {
+        /** i know, gcc extension. still, was convenient at the time */
+        switch(output[i])
+        {
+            case 0 ... 25:
+                printf("%c", 'A' + output[i]);
+                break;
+            case 26 ... 51:
+                printf("%c", 'a' + output[i] - 26);
+                break;
+            case 52 ... 61:
+                printf("%c", '0' + output[i] - 52);
+                break;
+            case 62:
+                printf("+");
+                break;
+            case 63:
+                printf("/");
+                break;
+        }
+    }
 }
 
 
