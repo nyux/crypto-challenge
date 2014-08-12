@@ -12,11 +12,11 @@ void base64_convert(char a, char b, char c)
     int output[4];
 
     output[0] = (a & 0xFC) >> 2;
-    output[1] = (a & 0x02) << 4 | (b & 0xF0 >> 4);
-    output[2] = (b & 0x0F) << 2 | (c & 0xC0) >> 2;
+    output[1] = (a & 0x03) << 4 | (b & 0xF0) >> 4;
+    output[2] = (b & 0x0F) << 2 | (c & 0xC0) >> 6;
     output[3] = c & 0x3F;
 
-    for (i = 0; i < 3; i++)
+    for (i = 0; i < 4; i++)
     {
         /** i know, gcc extension. still, was convenient at the time */
         switch(output[i])
@@ -37,6 +37,10 @@ void base64_convert(char a, char b, char c)
                 printf("/");
                 break;
         }
+
+#ifdef DEBUG
+        printf(" %d\n", output[i]);
+#endif
     }
 }
 
@@ -44,7 +48,12 @@ void base64_convert(char a, char b, char c)
 int main(void)
 {
     /* TODO: eventually read general input from stdin */
+#ifdef DEBUG
+    char *hex = "Man";
+#else
     char *hex = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d";
+#endif
+
 
     int hexlen = strlen(hex);
     int padding[] = {-1, -1};
