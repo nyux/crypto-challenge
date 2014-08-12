@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #define FIRST_CHAR(x) *(x)
 #define SECOND_CHAR(x) *((x) + 1)
@@ -44,23 +45,38 @@ void base64_convert(char a, char b, char c)
     }
 }
 
+void base64_copy_hex_byte(const char *src, char dest[static 3])
+{
+    int i;
+
+    for (i = 0; i < 3; i++) dest[i] = *(src + i);
+    dest[2] = '\0';
+}
+
 
 int main(void)
 {
     /* TODO: eventually read general input from stdin */
 #ifdef DEBUG
-    char *hex = "Man";
+    char *hex_str = "49276d";
 #else
-    char *hex = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d";
+    char *hex_str = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d";
 #endif
 
+    char hex_to_convert[3]; /* two chars + '\0' */
+    char ascii_values[3];
 
-    int hexlen = strlen(hex);
+    int hexlen = strlen(hex_str);
     int padding[] = {-1, -1};
     int i;
 
-    
-    for (i = 0; i < hexlen - hexlen%3; i += 3, hex += 3)
+    for (i = 0; i < hexlen - hexlen%6; i += 2, hex_str += 2)
+    {
+        
+    }
+
+    /* previous version of the code, as a straight ascii -> base64 converter */
+    /* for (i = 0; i < hexlen - hexlen%3; i += 3, hex += 3)
     {
        base64_convert(FIRST_CHAR(hex), SECOND_CHAR(hex), THIRD_CHAR(hex));
     }
@@ -73,5 +89,6 @@ int main(void)
         case 1:
             base64_convert(FIRST_CHAR(hex), SECOND_CHAR(hex), 0);
             break;
-    }
+    }*/
+
 }
