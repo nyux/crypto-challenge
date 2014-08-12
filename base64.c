@@ -68,11 +68,20 @@ int main(void)
 
     int hexlen = strlen(hex_str);
     int padding[] = {-1, -1};
-    int i;
+    int i, j;
 
-    for (i = 0; i < hexlen - hexlen%6; i += 2, hex_str += 2)
+    for (i = 0; i < hexlen - hexlen%6; i += 6, hex_str += 6)
     {
-        
+        char *hex_copy = hex_str;
+        for (j = 0; j < 3; j++, hex_copy+= 2)
+        {
+            base64_copy_hex_byte(hex_copy, hex_to_convert);
+            ascii_values[j] = (char) strtol(hex_to_convert, NULL, 16);
+            printf("%d ", ascii_values[j]);
+        }
+
+        base64_convert(FIRST_CHAR(ascii_values), SECOND_CHAR(ascii_values),
+                THIRD_CHAR(ascii_values));
     }
 
     /* previous version of the code, as a straight ascii -> base64 converter */
