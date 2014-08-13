@@ -53,6 +53,20 @@ void base64_copy_hex_byte(const char *src, char dest[static 3])
     dest[2] = '\0';
 }
 
+void base64_hex_to_ascii(char *hex_str, int bytes_to_get, 
+        char hex_to_convert[static 3], char ascii_values[static 3])
+{
+    int j;
+    for (j = 0; j < bytes_to_get; j++, hex_str+= 2)
+    {
+        base64_copy_hex_byte(hex_str, hex_to_convert);
+        ascii_values[j] = (char) strtol(hex_to_convert, NULL, 16);
+#ifdef DEBUG
+        printf("%d ", ascii_values[j]);
+#endif
+    }
+
+}
 
 int main(void)
 {
@@ -72,16 +86,11 @@ int main(void)
 
     for (i = 0; i < hexlen - hexlen%6; i += 6, hex_str += 6)
     {
-        char *hex_copy = hex_str;
-        for (j = 0; j < 3; j++, hex_copy+= 2)
-        {
-            base64_copy_hex_byte(hex_copy, hex_to_convert);
-            ascii_values[j] = (char) strtol(hex_to_convert, NULL, 16);
-            printf("%d ", ascii_values[j]);
-        }
-
+        base64_hex_to_ascii(hex_str, 3, hex_to_convert, ascii_values);
         base64_convert(FIRST_CHAR(ascii_values), SECOND_CHAR(ascii_values),
                 THIRD_CHAR(ascii_values));
+
+        // TODO: make this code work for hexlen % 6 =/= 0
     }
 
     /* previous version of the code, as a straight ascii -> base64 converter */
