@@ -93,6 +93,21 @@ int main(void)
         // TODO: make this code work for hexlen % 6 =/= 0
     }
 
+    switch(hexlen % 6)
+    {
+        case 4:
+            base64_hex_to_ascii(hex_str, 2, hex_to_convert, ascii_values);
+            ascii_values[2] = 0;
+            base64_convert(ascii_values[0], ascii_values[1], ascii_values[2]);
+            break;
+        case 2:
+            base64_hex_to_ascii(hex_str, 1, hex_to_convert, ascii_values);
+            ascii_values[2] = 0;
+            ascii_values[1] = 0;
+            base64_convert(ascii_values[0], ascii_values[1], ascii_values[2]);
+            break;
+    }
+
     /* previous version of the code, as a straight ascii -> base64 converter */
     /* for (i = 0; i < hexlen - hexlen%3; i += 3, hex += 3)
     {
