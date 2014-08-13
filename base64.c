@@ -3,10 +3,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#define FIRST_CHAR(x) *(x)
-#define SECOND_CHAR(x) *((x) + 1)
-#define THIRD_CHAR(x) *((x) + 2)
-
 void base64_convert(char a, char b, char c)
 {
     int i;
@@ -39,9 +35,9 @@ void base64_convert(char a, char b, char c)
                 break;
         }
 
-#ifdef DEBUG
-        printf(" %d\n", output[i]);
-#endif
+        #ifdef DEBUG
+            printf(" %d\n", output[i]);
+        #endif
     }
 }
 
@@ -56,27 +52,20 @@ void base64_copy_hex_byte(const char *src, char dest[static 3])
 void base64_hex_to_ascii(char *hex_str, int bytes_to_get, 
         char hex_to_convert[static 3], char ascii_values[static 3])
 {
-    int j;
-    for (j = 0; j < bytes_to_get; j++, hex_str+= 2)
+    int i;
+    for (i = 0; i < bytes_to_get; i++, hex_str+= 2)
     {
         base64_copy_hex_byte(hex_str, hex_to_convert);
-        ascii_values[j] = (char) strtol(hex_to_convert, NULL, 16);
-#ifdef DEBUG
-        printf("%d ", ascii_values[j]);
-#endif
+        ascii_values[i] = (char) strtol(hex_to_convert, NULL, 16);
+        #ifdef DEBUG
+            printf("%d ", ascii_values[i]);
+        #endif
     }
 
 }
 
-int main(void)
+void base64_encode(char* restrict hex_str)
 {
-    /* TODO: eventually read general input from stdin */
-#ifdef DEBUG
-    char *hex_str = "49276d";
-#else
-    char *hex_str = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d";
-#endif
-
     char hex_to_convert[3]; /* two chars + '\0' */
     char ascii_values[3];
 
@@ -87,10 +76,7 @@ int main(void)
     for (i = 0; i < hexlen - hexlen%6; i += 6, hex_str += 6)
     {
         base64_hex_to_ascii(hex_str, 3, hex_to_convert, ascii_values);
-        base64_convert(FIRST_CHAR(ascii_values), SECOND_CHAR(ascii_values),
-                THIRD_CHAR(ascii_values));
-
-        // TODO: make this code work for hexlen % 6 =/= 0
+        base64_convert(ascii_values[0], ascii_values[1], ascii_values[2]);
     }
 
     switch(hexlen % 6)
@@ -124,4 +110,15 @@ int main(void)
             break;
     }*/
 
+}
+
+int main(void)
+{
+    /* TODO: eventually read general input from stdin */
+
+    #ifdef DEBUG
+        base64_encode("49276d");
+    #else
+        base64_encode("49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d");
+    #endif
 }
