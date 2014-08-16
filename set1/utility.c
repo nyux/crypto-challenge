@@ -36,3 +36,15 @@ char* utility_hex_to_ascii(char *hexstr)
 
     return ascii;
 }
+
+#ifdef DEBUG
+    #include <stdio.h>
+
+    int main(void)
+    {
+        char *translation = utility_hex_to_ascii("61736466");
+        if (translation) printf("%s", translation); /* should print asdf */
+
+        return 0;
+    }
+#endif
