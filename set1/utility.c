@@ -43,7 +43,12 @@ char* utility_hex_to_ascii(char *hexstr)
     int main(void)
     {
         char *translation = utility_hex_to_ascii("61736466");
-        if (translation) printf("%s", translation); /* should print asdf */
+        
+        if (translation) 
+        {
+            printf("%s", translation); /* should print asdf */
+            free(translation);
+        }
 
         return 0;
     }
