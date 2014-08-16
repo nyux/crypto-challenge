@@ -68,11 +68,13 @@ void base64_hex_to_ascii(char *hex_str, int bytes_to_get,
 void base64_encode(const char* hex_str)
 {
     char *ascii_str = utility_hex_to_ascii(hex_str);
-    
+    char *ascii_copy = ascii_str;
+
+    if (!ascii_str) exit(-1);
+
     size_t ascii_len = strlen(ascii_str);
 
-
-    for (int i = 0; i < ascii_len - ascii_len%3; i += 3, hex_str += 3)
+    for (int i = 0; i < ascii_len - ascii_len%3; i += 3, ascii_str += 3)
     {
         base64_convert(FIRST_CHAR(ascii_str), SECOND_CHAR(ascii_str),
                 THIRD_CHAR(ascii_str));
@@ -88,7 +90,7 @@ void base64_encode(const char* hex_str)
             break;
     }
 
-    free(ascii_str);
+    free(ascii_copy);
 }
 
 int main(void)
