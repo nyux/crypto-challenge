@@ -1,31 +1,31 @@
 #include <stdlib.h>
 #include <string.h>
 
-char* utility_hex_to_ascii(char *hexstr)
+char* utility_hex_to_ascii(char *hex_str)
 {   
-    size_t hexlen = strlen(hexstr);
+    size_t hex_len = strlen(hex_str);
 
     /* every two characters in a hex string => one byte of ascii, + '\0' */
-    size_t ascii_len = hexlen / 2;
+    size_t ascii_len = hex_len / 2;
 
     char *ascii = malloc(sizeof(char) * ascii_len + 1);
 
     if (ascii != NULL)
     {
-        for (int i = 0; i < hexlen; i++)
+        for (int i = 0; i < ascii_len; i++)
         {
-            for (int j = 0; j < 5; j += 4)
+            for (int j = 4; j >= 0; j -= 4)
             {
-                switch (*hexstr++)
+                switch (*hex_str)
                 {
                     case '0' ... '9':
-                        ascii[i] |= (*hexstr - '0') << j;
+                        ascii[i] |= (*hex_str++ - '0') << j;
                         break;
                     case 'a' ... 'f':
-                        ascii[i] |= (*hexstr - 'a') << j;
+                        ascii[i] |= (*hex_str++ - 'a' + 10) << j;
                         break;
                     case 'A' ... 'F':
-                        ascii[i] |= (*hexstr - 'A') << j;
+                        ascii[i] |= (*hex_str++ - 'A' + 10) << j;
                         break;
                 }
             }
