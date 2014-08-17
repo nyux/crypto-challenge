@@ -7,8 +7,8 @@
 
 #define SAMPLE_FILE "sample.txt"
 
-/* four of the more common letters in the english language */
-double ratio_of_e, ratio_of_a, ratio_of_s, ratio_of_r;
+/* five of the more common symbols in the english language */
+double ratio_of_e, ratio_of_a, ratio_of_s, ratio_of_r, ratio_of_space;
 
 void generate_frequencies()
 {
@@ -31,6 +31,7 @@ void generate_frequencies()
     ratio_of_a = (frequencies['a'] + frequencies['A']) / (double) total;
     ratio_of_r = (frequencies['r'] + frequencies['R']) / (double) total;
     ratio_of_s = (frequencies['s'] + frequencies['S']) / (double) total;
+    ratio_of_space = frequencies[' '] / (double) total;
 
     fclose(sample);
 }
@@ -60,7 +61,7 @@ char* xor_cipher_translate(char *xor_ascii, char byte_to_xor)
     return translated_ascii;
 }
 
-bool good_enough(double ratio1, double ratio2)
+int good_enough(double ratio1, double ratio2)
 {
     return fabs(ratio1 - ratio2) < .02;
 }
@@ -69,6 +70,7 @@ bool xor_cipher_heuristic(const char *str_to_examine)
 {
     long frequencies[256];
     long total = 0;
+    int score;
 
     for (int i = 0; i < 256; i++) frequencies[i] = 0;
 
@@ -82,11 +84,15 @@ bool xor_cipher_heuristic(const char *str_to_examine)
     double local_ratio_of_a = (frequencies['a'] + frequencies['A']) / (double) total;
     double local_ratio_of_r = (frequencies['r'] + frequencies['R']) / (double) total;
     double local_ratio_of_s = (frequencies['s'] + frequencies['S']) / (double) total;
+    double local_ratio_of_space = frequencies[' '] / (double) total;
    
-    return good_enough(local_ratio_of_e, ratio_of_e)
-        || good_enough(local_ratio_of_a, ratio_of_a)
-        || good_enough(local_ratio_of_r, ratio_of_r)
-        || good_enough(local_ratio_of_s, ratio_of_s);
+    score =  good_enough(local_ratio_of_e, ratio_of_e)
+        + good_enough(local_ratio_of_a, ratio_of_a)
+        + good_enough(local_ratio_of_r, ratio_of_r)
+        + good_enough(local_ratio_of_s, ratio_of_s)
+        + good_enough(local_ratio_of_space, ratio_of_space);
+
+    return score > 1;
 }
 
 void xor_cipher_decode(char *hex_str)
