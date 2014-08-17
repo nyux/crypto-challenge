@@ -70,7 +70,7 @@ void base64_encode(const char* hex_str)
     char *ascii_str = utility_hex_to_ascii(hex_str);
     char *ascii_copy = ascii_str;
 
-    if (!ascii_str) exit(-1);
+    if (!ascii_str) utility_malloc_error();
 
     size_t ascii_len = strlen(ascii_str);
 

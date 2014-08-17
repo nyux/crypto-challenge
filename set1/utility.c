@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 char* utility_hex_to_ascii(char *hex_str)
 {   
@@ -37,8 +38,13 @@ char* utility_hex_to_ascii(char *hex_str)
     return ascii;
 }
 
+void utility_malloc_error()
+{
+    fprintf(stderr, "there was a problem with malloc, killing program");
+    exit(-1);
+}
+
 #ifdef DEBUG
-    #include <stdio.h>
 
     int main(void)
     {
