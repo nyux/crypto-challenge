@@ -44,7 +44,7 @@ void utility_malloc_error()
     exit(-1);
 }
 
-utility_file_error(char *filename)
+void utility_file_error(char *filename)
 {
     fprintf(stderr, "there was a problem opening the file %s, killing program",
             filename);
