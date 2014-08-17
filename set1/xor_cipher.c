@@ -124,4 +124,6 @@ void xor_cipher_decode(char *hex_str)
 int main(void)
 {
     xor_cipher_decode("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736");
+    xor_cipher_decode("773e7271687b3e67716b3e222d");
+
 }
