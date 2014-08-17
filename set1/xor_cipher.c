@@ -1,7 +1,40 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
+#include <math.h>
 #include "utility.h"
+
+#define SAMPLE_FILE "sample.txt"
+
+/* four of the more common letters in the english language */
+double ratio_of_e, ratio_of_a, ratio_of_s, ratio_of_r;
+
+void generate_frequencies()
+{
+    char c;
+    long total = 0;
+    long frequencies[256];
+    FILE *sample = fopen(SAMPLE_FILE, "r");
+
+    if (!sample) utility_file_error(SAMPLE_FILE);
+
+    for (int i = 0; i < 256; i++) frequencies[i] = 0;
+
+    while ((c = fgetc(sample)) != EOF)
+    {
+        frequencies[c]++;
+        total++;
+    }
+
+    ratio_of_e = (frequencies['e'] + frequencies['E']) / (double) total;
+    ratio_of_a = (frequencies['a'] + frequencies['A']) / (double) total;
+    ratio_of_r = (frequencies['r'] + frequencies['R']) / (double) total;
+    ratio_of_s = (frequencies['s'] + frequencies['S']) / (double) total;
+
+    fclose(sample);
+}
+
 
 char* xor_cipher_translate(char *xor_ascii, char byte_to_xor)
 {
@@ -27,9 +60,33 @@ char* xor_cipher_translate(char *xor_ascii, char byte_to_xor)
     return translated_ascii;
 }
 
-void xor_cipher_heuristic(const char *str_to_examine)
+bool good_enough(double ratio1, double ratio2)
 {
+    return fabs(ratio1 - ratio2) < .02;
+}
 
+bool xor_cipher_heuristic(const char *str_to_examine)
+{
+    long frequencies[256];
+    long total = 0;
+
+    for (int i = 0; i < 256; i++) frequencies[i] = 0;
+
+    for (; *str_to_examine; str_to_examine++)
+    {
+        frequencies[*str_to_examine]++;
+        total++;
+    }
+    
+    double local_ratio_of_e = (frequencies['e'] + frequencies['E']) / (double) total;
+    double local_ratio_of_a = (frequencies['a'] + frequencies['A']) / (double) total;
+    double local_ratio_of_r = (frequencies['r'] + frequencies['R']) / (double) total;
+    double local_ratio_of_s = (frequencies['s'] + frequencies['S']) / (double) total;
+   
+    return good_enough(local_ratio_of_e, ratio_of_e)
+        || good_enough(local_ratio_of_a, ratio_of_a)
+        || good_enough(local_ratio_of_r, ratio_of_r)
+        || good_enough(local_ratio_of_s, ratio_of_s);
 }
 
 void xor_cipher_decode(char *hex_str)
@@ -39,13 +96,18 @@ void xor_cipher_decode(char *hex_str)
 
     if (!xor_ascii) utility_malloc_error();
 
+    generate_frequencies();
+
     for (int i = 0; i < 255; i++)
     {
         translated_str = xor_cipher_translate(xor_ascii, i);
 
         if (!translated_str) continue;
 
-        xor_cipher_heuristic(translated_str);
+        if (xor_cipher_heuristic(translated_str)) 
+        {
+            printf("%s\n", translated_str);
+        }
 
         free(translated_str);
     }
