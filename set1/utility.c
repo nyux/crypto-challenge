@@ -45,14 +45,15 @@ size_t utility_ascii_len(const char *hex_str)
 
 void utility_malloc_error()
 {
-    fprintf(stderr, "there was a problem with malloc, killing program");
+    fprintf(stderr, "there was a problem with malloc, killing program\n");
     exit(-1);
 }
 
 void utility_file_error(const char *filename)
 {
-    fprintf(stderr, "there was a problem opening the file %s, killing program",
+    fprintf(stderr, "there was a problem opening the file %s, killing program\n",
             filename);
+    exit(-1);
 }
 
 #ifdef DEBUG
