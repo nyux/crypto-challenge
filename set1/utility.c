@@ -2,14 +2,17 @@
 #include <string.h>
 #include <stdio.h>
 
+size_t utility_ascii_len(const char *hex_str)
+{
+    /* every two characters in a hex string => one byte of ascii */
+    return strlen(hex_str) / 2;
+}
+
 char* utility_hex_to_ascii(char *hex_str)
 {   
     size_t hex_len = strlen(hex_str);
-
-    /* every two characters in a hex string => one byte of ascii, + '\0' */
-    size_t ascii_len = hex_len / 2;
-
-    char *ascii = malloc(sizeof(char) * ascii_len + 1);
+    size_t ascii_len = utility_ascii_len(hex_str);
+    char *ascii = calloc(ascii_len + 1, sizeof(char)); /* length + '\0' */
 
     if (ascii != NULL)
     {
@@ -31,16 +34,9 @@ char* utility_hex_to_ascii(char *hex_str)
                 }
             }
         }
-
-        ascii[ascii_len] = '\0';
     }
 
     return ascii;
-}
-
-size_t utility_ascii_len(const char *hex_str)
-{
-    return strlen(hex_str) / 2;
 }
 
 void utility_malloc_error()
