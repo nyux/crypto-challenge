@@ -2,40 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <limits.h>
 #include <math.h>
+
 #include "utility.h"
-
-#define SAMPLE_FILE "sample.txt"
-
-/* five of the more common symbols in the english language */
-double ratio_of_e, ratio_of_a, ratio_of_s, ratio_of_r, ratio_of_space;
-
-void generate_frequencies()
-{
-    char c;
-    long total = 0;
-    long frequencies[256];
-    FILE *sample = fopen(SAMPLE_FILE, "r");
-
-    if (!sample) utility_file_error(SAMPLE_FILE);
-
-    for (int i = 0; i < 256; i++) frequencies[i] = 0;
-
-    while ((c = fgetc(sample)) != EOF)
-    {
-        frequencies[c]++;
-        total++;
-    }
-
-    ratio_of_e = (frequencies['e'] + frequencies['E']) / (double) total;
-    ratio_of_a = (frequencies['a'] + frequencies['A']) / (double) total;
-    ratio_of_r = (frequencies['r'] + frequencies['R']) / (double) total;
-    ratio_of_s = (frequencies['s'] + frequencies['S']) / (double) total;
-    ratio_of_space = frequencies[' '] / (double) total;
-
-    fclose(sample);
-}
-
 
 char* xor_cipher_translate(char *xor_ascii, size_t ascii_len, char byte_to_xor)
 {
@@ -50,7 +20,9 @@ char* xor_cipher_translate(char *xor_ascii, size_t ascii_len, char byte_to_xor)
     {
         translated_ascii[i] ^= byte_to_xor;
 
-        if ((unsigned char) translated_ascii[i] > 127)
+        /* any char below 10 is either > 127 when unsigned, or really unlikely
+         * to be part of a valid ascii string */
+        if (translated_ascii[i] < 10)
         {
             free(translated_ascii);
             return NULL;
@@ -60,49 +32,45 @@ char* xor_cipher_translate(char *xor_ascii, size_t ascii_len, char byte_to_xor)
     return translated_ascii;
 }
 
-int good_enough(double ratio1, double ratio2)
+/* New heuristic copied over from girlfriend's code at
+ * https://github.com/irene-h/cryptochallenge/blob/master/set1/challenge1-3.rb
+ * with consent. */
+int xor_cipher_get_score(char c)
 {
-    return fabs(ratio1 - ratio2) < .02;
+    char *lower = "etaoinshrdlcumwfgypbvkjxqz";
+    char *upper = "ETAOINSHRDLCUMWFGYPBVKJXQZ";
+
+    /* there are 26 bloody letters in the english alphabet */
+    size_t num_letters = 26;
+
+    for (int i = 0; *lower; i++, lower++, upper++)
+    {
+        if (c == *lower || c == *upper) return i;
+    }
+
+    return num_letters;
 }
 
-bool xor_cipher_heuristic(const char *str_to_examine, size_t str_len)
+int xor_cipher_heuristic(const char *str_to_examine, size_t str_len)
 {
-    long frequencies[256];
-    long total = 0;
-    int score;
+    int score = 0;
 
-    for (int i = 0; i < 256; i++) frequencies[i] = 0;
-
-    for (int i = 0; i < str_len; i++, str_to_examine++)
+    for (int i = 0; i < str_len; i++)
     {
-        frequencies[*str_to_examine]++;
-        total++;
+        score += xor_cipher_get_score(str_to_examine[i]);
     }
-    
-    double local_ratio_of_e = (frequencies['e'] + frequencies['E']) / (double) total;
-    double local_ratio_of_a = (frequencies['a'] + frequencies['A']) / (double) total;
-    double local_ratio_of_r = (frequencies['r'] + frequencies['R']) / (double) total;
-    double local_ratio_of_s = (frequencies['s'] + frequencies['S']) / (double) total;
-    double local_ratio_of_space = frequencies[' '] / (double) total;
-   
-    score =  good_enough(local_ratio_of_e, ratio_of_e)
-        + good_enough(local_ratio_of_a, ratio_of_a)
-        + good_enough(local_ratio_of_r, ratio_of_r)
-        + good_enough(local_ratio_of_s, ratio_of_s)
-        + good_enough(local_ratio_of_space, ratio_of_space);
-
-    return score > 1;
+    return score;
 }
 
 void xor_cipher_decode(char *hex_str)
 {
     char *xor_ascii = utility_hex_to_ascii(hex_str);
     size_t ascii_len = utility_ascii_len(hex_str);
-    char *translated_str;
+
+    char *translated_str, *best = malloc(1), *temp;
+    int score, best_score = INT_MAX;
 
     if (!xor_ascii) utility_malloc_error();
-
-    generate_frequencies();
 
     for (int i = 0; i < 255; i++)
     {
@@ -110,12 +78,23 @@ void xor_cipher_decode(char *hex_str)
 
         if (!translated_str) continue;
 
-        if (xor_cipher_heuristic(translated_str, ascii_len)) 
+        score = xor_cipher_heuristic(translated_str, ascii_len);
+
+        if (score < best_score)
         {
-            printf("%s\n", translated_str);
+            temp = translated_str;
+            translated_str = best;
+            best = temp;
+            best_score = score;
         }
 
         free(translated_str);
+    }
+
+    if (best)
+    {
+        printf("%s\n", best);
+        free(best);
     }
 
     free(xor_ascii);
