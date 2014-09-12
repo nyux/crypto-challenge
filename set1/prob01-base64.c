@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "utility.h"
+
+#include "utility/utility.h"
 
 #define FIRST_CHAR(x) *(x)
 #define SECOND_CHAR(x) *((x) + 1)

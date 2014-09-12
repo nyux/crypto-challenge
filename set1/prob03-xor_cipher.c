@@ -5,7 +5,7 @@
 #include <limits.h>
 #include <math.h>
 
-#include "utility.h"
+#include "utility/utility.h"
 
 char* xor_cipher_translate(char *xor_ascii, size_t ascii_len, char byte_to_xor)
 {
