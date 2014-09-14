@@ -45,27 +45,6 @@ void base64_convert(char a, char b, char c)
     }
 }
 
-/*
-void base64_copy_hex_byte(const char *src, char dest[static 3])
-{
-    for (int i = 0; i < 3; i++) dest[i] = *(src + i);
-    dest[2] = '\0';
-}
-
-void base64_hex_to_ascii(char *hex_str, int bytes_to_get, 
-        char hex_to_convert[static 3], char ascii_values[static 3])
-{
-    for (int i = 0; i < bytes_to_get; i++, hex_str+= 2)
-    {
-        base64_copy_hex_byte(hex_str, hex_to_convert);
-        ascii_values[i] = (char) strtol(hex_to_convert, NULL, 16);
-        #ifdef DEBUG
-            printf("%d ", ascii_values[i]);
-        #endif
-    }
-
-}*/
-
 void base64_encode(const char* hex_str)
 {
     char *ascii_str = utility_hex_to_ascii(hex_str);
@@ -91,16 +70,16 @@ void base64_encode(const char* hex_str)
             break;
     }
 
+    putchar('\n');
+
     free(ascii_copy);
 }
 
-int main(void)
-{
-    /* TODO: eventually read general input from stdin */
-
-    #ifdef DEBUG
+#ifdef RUNMAIN
+    int main(void)
+    {
+        /* TODO: eventually read general input from stdin */
         base64_encode("49276d");
-    #else
         base64_encode("49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d");
-    #endif
-}
+    }
+#endif

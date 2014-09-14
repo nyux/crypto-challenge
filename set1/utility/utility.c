@@ -52,8 +52,7 @@ void utility_file_error(const char *filename)
     exit(-1);
 }
 
-#ifdef DEBUG
-
+#ifdef UTILITYDEBUG
     int main(void)
     {
         char *translation = utility_hex_to_ascii("61736466");
