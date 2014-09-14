@@ -3,6 +3,9 @@
 #include <gmp.h>
 
 /* remember: compile with -lgmp flag */
+/* written as a one-off script mostly because (as of now) it doesn't seem to
+ * be needed by any other challenge. if that ends up not being the case,
+ * it'll be rewritten with properly general functions and everything. */
 int main(void)
 {
     char *hex1 = "1c0111001f010100061a024b53535009181c";
