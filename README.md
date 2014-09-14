@@ -8,6 +8,5 @@ To compile, either use clang or add `std=c11` when using gcc.
 
 # To-Do
 
-* add Makefile
 * finish the first set of problems
 * make certain files read input from stdin (undecided)
