@@ -20,8 +20,12 @@ list_t* list_new()
 
 void list_add(list_t *list, void *obj)
 {
-    size_t index = list->slots_used;
-    list->list[index] = obj;
+    if (list->slots_used == list->list_size) 
+    {
+        list->list = realloc(list, sizeof(list->list) * 2);
+    }
+
+    list->list[list->slots_used] = obj;
     list->slots_used++;
 }
 
@@ -32,5 +36,10 @@ size_t list_size(list_t *list)
 
 void* list_get(list_t *list, size_t index)
 {
-    return list->list[index];
+    return (index < 0 || index > list->slots_used) ? NULL : list->list[index];
+}
+
+void list_empty(list_t *list)
+{
+    for (int i = 0; i < list->slots_used; i++) list->list[i] = NULL;
 }
