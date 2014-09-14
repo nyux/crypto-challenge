@@ -8,14 +8,20 @@
 #define SECOND_CHAR(x) *((x) + 1)
 #define THIRD_CHAR(x) *((x) + 2)
 
+/* does an ascii -> base64 conversion, three characters at a time. the 
+ * conversion involves turning three bytes into four, by taking six bits 
+ * from these characters at a time and placing them into a byte. depending
+ * on the value of the output bytes, a specific set of characters is printed.
+ * returns nothing.
+ */
 void base64_convert(char a, char b, char c)
 {
     int output[4];
 
     output[0] = (a & 0xFC) >> 2;
     output[1] = (a & 0x03) << 4 | (b & 0xF0) >> 4;
-    output[2] = (b & 0x0F) << 2 | (c & 0xC0) >> 6;
-    output[3] = c & 0x3F;
+    output[2] = b == 0 ? 64 : (b & 0x0F) << 2 | (c & 0xC0) >> 6;
+    output[3] = c == 0 ? 64 : c & 0x3F;
 
     for (int i = 0; i < 4; i++)
     {
@@ -37,6 +43,9 @@ void base64_convert(char a, char b, char c)
             case 63:
                 printf("/");
                 break;
+            case 64:
+                printf("=");
+                break;
         }
 
         #ifdef DEBUG
@@ -45,6 +54,10 @@ void base64_convert(char a, char b, char c)
     }
 }
 
+/* turns the initial hex string into ascii. the ascii string is decomposed
+ * three characters at a time. if the ascii string's length isn't divisible
+ * by three, it passes in 0 bytes. at the end, it frees the ascii string
+ */
 void base64_encode(const char* hex_str)
 {
     char *ascii_str = utility_hex_to_ascii(hex_str);
