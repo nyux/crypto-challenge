@@ -2,13 +2,15 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "utility.h"
+
 size_t utility_ascii_len(const char *hex_str)
 {
     /* every two characters in a hex string => one byte of ascii */
     return strlen(hex_str) / 2;
 }
 
-char* utility_hex_to_ascii(char *hex_str)
+char* utility_hex_to_ascii(const char *hex_str)
 {   
     size_t hex_len = strlen(hex_str);
     size_t ascii_len = utility_ascii_len(hex_str);
@@ -52,6 +54,40 @@ void utility_file_error(const char *filename)
     exit(-1);
 }
 
+char* utility_readline()
+{
+    size_t str_len = 10, tally = 0;
+    char c, *input = malloc(str_len); /* ten chars + '\0' */
+
+    if (!input) utility_malloc_error();
+
+    while ((c = getchar()) != '\n' && c != EOF)
+    {
+        if (tally == str_len)
+        {
+            str_len *= 2;
+            input = utility_resize_str(input, str_len);
+        }
+        input[tally] = c;
+        tally++;
+    }
+
+    if (tally == str_len) utility_resize_str(input, ++str_len);
+    input[tally] = '\0';
+
+    return input;
+}
+
+
+
+char* utility_resize_str(char *str, size_t newsize)
+{
+    str = realloc(str, newsize);
+    if (!str) utility_malloc_error();
+    return str;
+}
+
+
 #ifdef UTILITYDEBUG
     int main(void)
     {
@@ -59,8 +95,13 @@ void utility_file_error(const char *filename)
         
         if (translation) 
         {
-            printf("%s", translation); /* should print asdf */
+            printf("%s\n", translation); /* should print asdf */
             free(translation);
+        }
+
+        for (int i = 0; i < 3; i++) {
+        char *thing = utility_readline();
+        if (thing) { printf("%s\n", thing); free(thing); }
         }
 
         return 0;
