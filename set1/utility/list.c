@@ -36,7 +36,7 @@ size_t list_size(list_t *list)
 
 void* list_get(list_t *list, size_t index)
 {
-    return (index < 0 || index > list->slots_used) ? NULL : list->list[index];
+    return (index > list->slots_used) ? NULL : list->list[index];
 }
 
 void list_empty(list_t *list)
