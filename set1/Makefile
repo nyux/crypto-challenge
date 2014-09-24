@@ -7,7 +7,7 @@ prob02:
 	clang -o prob02.o prob02-fixed_xor.c -lgmp
 
 prob03:
-	clang -o prob03.o -DRUNMAIN=1 prob03-xor_cipher.c utility/utility.c -lm
+	clang -o prob03.o -DRUNMAIN=1 prob03-xor_cipher.c utility/utility.c
 
 clean:
 	rm *.o
