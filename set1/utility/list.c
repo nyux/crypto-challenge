@@ -55,3 +55,9 @@ void list_empty(list_t *list)
 {
     for (int i = 0; i < list->slots_used; i++) list->list[i] = NULL;
 }
+
+void list_free(list_t **list)
+{
+    free((*list)->list);
+    free(*list);
+}
