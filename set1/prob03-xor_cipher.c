@@ -7,34 +7,53 @@
 
 #include "utility/utility.h"
 
-char* xor_cipher_translate(char *xor_ascii, size_t ascii_len, char byte_to_xor)
+/* NOTE: lots of a previous version's variable names referred to things as
+ * ascii strings (ascii_str, xor_ascii, ascii_len), which isn't necessarily
+ * a valid assumption. (for example, the bytestring decoded from hex may
+ * contain characters > 127 or contain '\0' bytes anywhere in the string (which
+ * violates the assumption that strings are null-terminated arrays of chars.)
+ * thus the refactoring. */
+
+/* mallocs out a new chunk of memory with the size of the xor'd byte sequence.
+ * halts the program if malloc fails. copies over the xor'd bytes into the
+ * malloc'd memory and does an xor transformation on it. if one of the
+ * resulting translated characters isn't in the range of ascii characters,
+ * it returns NULL as an error condition. otherwise, it returns a translated
+ * sequence of bytes, which may or may not be an english ascii string. */
+char* xor_cipher_translate(char *xor_bytestr, size_t bytestr_len, char byte_to_xor)
 {
-    char *translated_ascii = malloc(ascii_len + 1);
+    char *translated_bytes = malloc(bytestr_len + 1);
 
-    if (!translated_ascii) utility_malloc_error();
+    if (!translated_bytes) utility_malloc_error();
 
-    memcpy(translated_ascii, xor_ascii, ascii_len);
-    translated_ascii[ascii_len] = '\0';
+    memcpy(translated_bytes, xor_bytestr, bytestr_len);
+    translated_bytes[bytestr_len] = '\0';
 
-    for (int i = 0; i < ascii_len; i++)
+    for (int i = 0; i < bytestr_len; i++)
     {
-        translated_ascii[i] ^= byte_to_xor;
+        translated_bytes[i] ^= byte_to_xor;
 
         /* any char below 10 is either > 127 when unsigned, or really unlikely
-         * to be part of a valid ascii string */
-        if (translated_ascii[i] < 10)
+         * to be part of a valid byte string */
+        if (translated_bytes[i] < 10)
         {
-            free(translated_ascii);
+            free(translated_bytes);
             return NULL;
         }
     }
 
-    return translated_ascii;
+    return translated_bytes;
 }
 
 /* New heuristic copied over from girlfriend's code at
  * https://github.com/irene-h/cryptochallenge/blob/master/set1/challenge1-3.rb
  * with consent. */
+/* gives a score to a particular character based on its frequency in the
+ * english alphabet. the more common the letter, the lower the score. this
+ * function is meant to be iterated over a bytestring to grade it -- the lower
+ * the bytestring's grade, the higher the chance that it is english. this
+ * sort of heuristic discriminates against strings with lots of numbers or
+ * other ascii symbols, which is a shame. */
 int xor_cipher_get_score(char c)
 {
     char *lower = "etaoinshrdlcumwfgypbvkjxqz";
@@ -51,47 +70,58 @@ int xor_cipher_get_score(char c)
     return num_letters;
 }
 
-int xor_cipher_heuristic(const char *str_to_examine, size_t str_len)
+
+/* accumulates the score for a bytestring to assess the chance that it is
+ * an actual english phrase. */
+int xor_cipher_heuristic(const char *bytestr, size_t bytestr_len)
 {
     int score = 0;
 
-    for (int i = 0; i < str_len; i++)
+    for (int i = 0; i < bytestr_len; i++)
     {
-        score += xor_cipher_get_score(str_to_examine[i]);
+        score += xor_cipher_get_score(bytestr[i]);
     }
     return score;
 }
 
+/* takes in a hex representation of a bytestring and transforms it to the
+ * hexstring it represents. for every valid string (that is, passes the
+ * requirements of translate(char *, size_t, char) it grades it. the best
+ * string is preserved and the rest are freed after being passed through
+ * the heuristic. it frees the decoded bytestring and returns the best
+ * candidate for being an ascii string. */
 char* xor_cipher_decode(char *hex_str)
 {
-    char *xor_ascii = utility_hex_to_ascii(hex_str);
-    size_t ascii_len = utility_ascii_len(hex_str);
+    /* as per the note above, the names of these two functions is problematic
+     * have to figure out something nice to refactor them into. */
+    char *xor_bytestr = utility_hex_to_ascii(hex_str);
+    size_t bytestr_len = utility_ascii_len(hex_str);
 
-    char *translated_str, *best = malloc(1), *temp;
+    char *translated_bytestr, *best = malloc(1), *temp;
     int score, best_score = INT_MAX;
 
-    if (!xor_ascii) utility_malloc_error();
+    if (!xor_bytestr) utility_malloc_error();
 
     for (int i = 0; i < 255; i++)
     {
-        translated_str = xor_cipher_translate(xor_ascii, ascii_len, i);
+        translated_bytestr = xor_cipher_translate(xor_bytestr, bytestr_len, i);
 
-        if (!translated_str) continue;
+        if (!translated_bytestr) continue;
 
-        score = xor_cipher_heuristic(translated_str, ascii_len);
+        score = xor_cipher_heuristic(translated_bytestr, bytestr_len);
 
         if (score < best_score)
         {
-            temp = translated_str;
-            translated_str = best;
+            temp = translated_bytestr;
+            translated_bytestr = best;
             best = temp;
             best_score = score;
         }
 
-        free(translated_str);
+        free(translated_bytestr);
     }
 
-    free(xor_ascii);
+    free(xor_bytestr);
     return best;
 }
 
