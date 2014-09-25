@@ -88,7 +88,7 @@ int xor_cipher_heuristic(const char *bytestr, size_t bytestr_len)
  * string is preserved and the rest are freed after being passed through
  * the heuristic. it frees the decoded bytestring and returns the best
  * candidate for being an ascii string. */
-char* xor_cipher_decode(char *hex_str)
+char* xor_cipher_decode(const char *hex_str)
 {
     /* as per the note above, the names of these two functions is problematic
      * have to figure out something nice to refactor them into. */
