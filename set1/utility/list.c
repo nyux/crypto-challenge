@@ -9,31 +9,22 @@ list_t* list_new()
 
     if (!list) utility_malloc_error();
     
-    list->list_size = 10;
+    list->size = 10;
     list->slots_used = 0;
-    list->list = calloc(list->list_size, sizeof(void *));
+    list->list = calloc(list->size, sizeof(void *));
 
     if (!list->list) utility_malloc_error();
 
     return list;
 }
 
-void resize_array(list_t *list)
-{
-    void **arr;
-    
-    list->list_size *= 2;
-    arr = calloc(list->list_size * 2, sizeof(void *));
-
-    for (int i = 0; i < list->slots_used; i++) arr[i] = list->list[i];
-
-    free(list->list);
-    list->list = arr;
-}
-
 void list_add(list_t *list, void *obj)
 {
-    if (list->slots_used == list->list_size) resize_array(list); 
+    if (list->slots_used == list->size)
+    {
+        list->size *= 2;
+        list->list = realloc(list->list, list->size * sizeof(void *));
+    }
 
     list->list[list->slots_used] = obj;
     list->slots_used++;

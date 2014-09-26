@@ -4,7 +4,7 @@
 
 typedef struct
 {
-    size_t list_size;
+    size_t size;
     size_t slots_used;
     void **list;
 } list_t;
