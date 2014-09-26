@@ -30,8 +30,6 @@ void list_add(list_t *list, void *obj)
     list->slots_used++;
 }
 
-
-
 size_t list_size(list_t *list)
 {
     return list->slots_used;
@@ -39,12 +37,12 @@ size_t list_size(list_t *list)
 
 void* list_get(list_t *list, size_t index)
 {
-    return (index > list->slots_used) ? NULL : list->list[index];
+    return (index < list->slots_used) ? list->list[index] : NULL;
 }
 
 void list_empty(list_t *list)
 {
-    for (int i = 0; i < list->slots_used; i++) list->list[i] = NULL;
+    list->slots_used = 0; 
 }
 
 void list_free(list_t **list)
