@@ -21,11 +21,10 @@ char* repeating_key_encode(char *bytestr, size_t bytestr_len, char *key,
     return xor_bytestr;
 }
 
-
-
 int main(void)
 {
-    char *teststr = "Burning 'em, if you ain't quick and nimble", *key = "ICE";
+    char *teststr = "Burning 'em, if you ain't quick and nimble\n"
+        "I go crazy when I hear a cymbal", *key = "ICE";
     char *raw_result = repeating_key_encode(teststr, strlen(teststr), key, 3);
     char *result;
 
