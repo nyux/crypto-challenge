@@ -41,6 +41,27 @@ char* utility_hex_to_ascii(const char *hex_str)
     return ascii;
 }
 
+char* utility_bytestr_to_hexstr(const char *bytestr, size_t byte_len)
+{
+    int high = 1;
+    size_t hexstr_len = byte_len * 2;
+    char *hexstr = malloc(hexstr_len + 1);
+    char letters[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+        'a', 'b', 'c', 'd', 'e', 'f'};
+
+    if (!hexstr) utility_malloc_error();
+
+    for (int i = 0; i < hexstr_len; i++)
+    {
+        hexstr[i] = letters[high ? (bytestr[i/2] & 0xF0) >> 4 : bytestr[i/2] & 0x0F];
+        high = !high;
+    }
+
+    hexstr[hexstr_len] = '\0';
+    return hexstr;
+}
+
+
 void utility_malloc_error()
 {
     fprintf(stderr, "there was a problem with malloc, killing program\n");
@@ -78,8 +99,6 @@ char* utility_readline()
     return input;
 }
 
-
-
 char* utility_resize_str(char *str, size_t newsize)
 {
     str = realloc(str, newsize);
@@ -103,6 +122,10 @@ char* utility_resize_str(char *str, size_t newsize)
         char *thing = utility_readline();
         if (thing) { printf("%s\n", thing); free(thing); }
         }
+
+        char *hexstr = utility_bytestr_to_hexstr("asdf", 4);
+
+        if (hexstr) { printf("%s\n", hexstr); free(hexstr); }
 
         return 0;
     }

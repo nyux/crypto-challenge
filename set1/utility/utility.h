@@ -10,5 +10,6 @@ void utility_file_error(const char *filename);
 size_t utility_ascii_len(const char *hex_str);
 char* utility_readline();
 char* utility_resize_str(char *str, size_t newsize);
+char* utility_bytestr_to_hexstr(const char *bytestr, size_t bytestr_len);
 
 #endif
