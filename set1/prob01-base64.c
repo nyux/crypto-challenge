@@ -7,14 +7,9 @@
 #define FIRST_CHAR(x) *(x)
 #define SECOND_CHAR(x) *((x) + 1)
 #define THIRD_CHAR(x) *((x) + 2)
+#define FOURTH_CHAR(x) *((x) + 3)
 
-/* does an ascii -> base64 conversion, three characters at a time. the 
- * conversion involves turning three bytes into four, by taking six bits 
- * from these characters at a time and placing them into a byte. depending
- * on the value of the output bytes, a specific set of characters is printed.
- * returns nothing.
- */
-void base64_convert(char *base64_str, char a, char b, char c)
+void base64_encode_convert(char *base64_str, char a, char b, char c)
 {
     int output[4];
 
@@ -54,11 +49,7 @@ void base64_convert(char *base64_str, char a, char b, char c)
     }
 }
 
-/* turns the initial hex string into ascii. the ascii string is decomposed
- * three characters at a time. if the ascii string's length isn't divisible
- * by three, it passes in 0 bytes. at the end, it frees the ascii string
- */
-char* base64_encode(const char* bytestr, size_t len)
+char* base64_encode(const char *bytestr, size_t len)
 {
     size_t remainder = len % 3;
     size_t base64_len = (len + (remainder == 0 ? 0 : 3 - remainder)) * 4/3 + 1;
@@ -68,24 +59,92 @@ char* base64_encode(const char* bytestr, size_t len)
 
     for (int i = 0; i < len - remainder; i += 3, bytestr += 3, current_pos += 4)
     {
-        base64_convert(current_pos, FIRST_CHAR(bytestr), SECOND_CHAR(bytestr),
-                THIRD_CHAR(bytestr));
+        base64_encode_convert(current_pos, FIRST_CHAR(bytestr), 
+                SECOND_CHAR(bytestr), THIRD_CHAR(bytestr));
     }
 
     switch(remainder)
     {
         case 2:
-            base64_convert(current_pos, FIRST_CHAR(bytestr),
+            base64_encode_convert(current_pos, FIRST_CHAR(bytestr),
                     SECOND_CHAR(bytestr), 0);
             break;
         case 1:
-            base64_convert(current_pos, FIRST_CHAR(bytestr), 0, 0);
+            base64_encode_convert(current_pos, FIRST_CHAR(bytestr), 0, 0);
             break;
     }
 
     base64[base64_len] = '\0';
 
     return base64;
+}
+
+void base64_decode_convert(char *decoded_str, char a, char b, char c, char d)
+{
+    int input[4];
+
+    input[0] = a;
+    input[1] = b;
+    input[2] = c;
+    input[3] = d;
+
+    for (int i = 0; i < 4; i++)
+    {
+        switch(input[i])
+        {
+            case 'A' ... 'Z':
+                input[i] -= 'A';
+                break;
+            case 'a' ... 'z':
+                input[i] = input[i] - 'a' + 26;
+                break;
+            case '0' ... '9':
+                input[i] = input[i] - '0' + 52;
+                break;
+            case '+':
+                input[i] = 62;
+                break;
+            case '/':
+                input[i] = 63;
+                break;
+            case '=':
+                input[i] = 0;
+                break;
+        }
+    }
+
+    decoded_str[0] = ((input[0] & 0x3F) << 2) | ((input[1] & 0x30) >> 4);
+    if (input[2])
+    {
+        decoded_str[1] = ((input[1] & 0x0F) << 4) | ((input[2] & 0x3C) >> 2);
+    }
+    if (input[3])
+    {
+        decoded_str[2] = ((input[2] & 0x03) << 6) | (input[3] & 0x3F);
+    }
+}
+
+
+
+char* base64_decode(const char *base64_str)
+{
+    size_t base64_len = strlen(base64_str);
+    size_t decoded_len = strlen(base64_str) * 3/4;
+
+    char *decoded_str = malloc(decoded_len + 1);
+    char *current_pos = decoded_str;
+
+    if (!decoded_str) utility_malloc_error();
+    
+    for (int i = 0; i < base64_len; i += 4, base64_str += 4, current_pos += 3)
+    {
+        base64_decode_convert(current_pos, FIRST_CHAR(base64_str),
+                SECOND_CHAR(base64_str), THIRD_CHAR(base64_str),
+                FOURTH_CHAR(base64_str));
+    }
+    
+    decoded_str[decoded_len] = '\0'; 
+    return decoded_str;
 }
 
 #ifdef RUNMAIN
@@ -115,7 +174,12 @@ char* base64_encode(const char* bytestr, size_t len)
         if (!result) utility_malloc_error();
         printf("%s\n", result);
 
+        char *decoded_result = base64_decode(result);
+        if (!decoded_result) utility_malloc_error();
+        printf("%s\n", decoded_result);
+
         free(large_bytestr);
         free(result);
+        free(decoded_result);
     }
 #endif
