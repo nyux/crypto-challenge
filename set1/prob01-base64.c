@@ -58,41 +58,47 @@ void base64_convert(char a, char b, char c)
  * three characters at a time. if the ascii string's length isn't divisible
  * by three, it passes in 0 bytes. at the end, it frees the ascii string
  */
-void base64_encode(const char* hex_str)
+void base64_encode(const char* byte_str, size_t len)
 {
-    char *ascii_str = utility_hex_to_ascii(hex_str);
-    char *ascii_copy = ascii_str;
-
-    if (!ascii_str) utility_malloc_error();
-
-    size_t ascii_len = strlen(ascii_str);
-
-    for (int i = 0; i < ascii_len - ascii_len%3; i += 3, ascii_str += 3)
+    for (int i = 0; i < len - len%3; i += 3, byte_str += 3)
     {
-        base64_convert(FIRST_CHAR(ascii_str), SECOND_CHAR(ascii_str),
-                THIRD_CHAR(ascii_str));
+        base64_convert(FIRST_CHAR(byte_str), SECOND_CHAR(byte_str),
+                THIRD_CHAR(byte_str));
     }
 
-    switch(ascii_len % 3)
+    switch(len % 3)
     {
         case 2:
-            base64_convert(FIRST_CHAR(ascii_str), SECOND_CHAR(ascii_str), 0);
+            base64_convert(FIRST_CHAR(byte_str), SECOND_CHAR(byte_str), 0);
             break;
         case 1:
-            base64_convert(FIRST_CHAR(ascii_str), 0, 0);
+            base64_convert(FIRST_CHAR(byte_str), 0, 0);
             break;
     }
 
     putchar('\n');
-
-    free(ascii_copy);
 }
 
 #ifdef RUNMAIN
     int main(void)
     {
         /* TODO: eventually read general input from stdin */
-        base64_encode("49276d");
-        base64_encode("49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d");
+        char *small_test = "49276d";
+        char *small_bytestr = utility_hex_to_ascii();
+        size_t small_size = utility_ascii_len(small_test);
+        
+        if (!small_bytestr) utility_malloc_error();
+        
+        base64_encode(small_bytestr, small_size);
+        free(small_bytestr);
+
+        char *large_test = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d";
+        char *large_bytestr = utility_hex_to_ascii();
+        size_t large_size = utility_ascii_len(large_test);
+
+        if (!large_bytestr) utility_malloc_error();
+        
+        base64_encode(large_bytestr, small_size);
+        free(large_bytestr);
     }
 #endif
