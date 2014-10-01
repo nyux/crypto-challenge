@@ -14,7 +14,7 @@
  * on the value of the output bytes, a specific set of characters is printed.
  * returns nothing.
  */
-void base64_convert(char a, char b, char c)
+void base64_convert(char *base64_str, char a, char b, char c)
 {
     int output[4];
 
@@ -29,22 +29,22 @@ void base64_convert(char a, char b, char c)
         switch(output[i])
         {
             case 0 ... 25:
-                printf("%c", 'A' + output[i]);
+                *(base64_str + i) = 'A' + output[i];
                 break;
             case 26 ... 51:
-                printf("%c", 'a' + output[i] - 26);
+                *(base64_str + i) = 'a' + output[i] - 26;
                 break;
             case 52 ... 61:
-                printf("%c", '0' + output[i] - 52);
+                *(base64_str + i) = '0' + output[i] - 52;
                 break;
             case 62:
-                printf("+");
+                *(base64_str + i) = '+';
                 break;
             case 63:
-                printf("/");
+                *(base64_str + i) = '/';
                 break;
             case 64:
-                printf("=");
+                *(base64_str + i) = '=';
                 break;
         }
 
@@ -58,25 +58,34 @@ void base64_convert(char a, char b, char c)
  * three characters at a time. if the ascii string's length isn't divisible
  * by three, it passes in 0 bytes. at the end, it frees the ascii string
  */
-void base64_encode(const char* byte_str, size_t len)
+char* base64_encode(const char* bytestr, size_t len)
 {
-    for (int i = 0; i < len - len%3; i += 3, byte_str += 3)
+    size_t remainder = len % 3;
+    size_t base64_len = (len + (remainder == 0 ? 0 : 3 - remainder)) * 4/3 + 1;
+    
+    char *base64 = malloc(base64_len);
+    char *current_pos = base64;
+
+    for (int i = 0; i < len - remainder; i += 3, bytestr += 3, current_pos += 4)
     {
-        base64_convert(FIRST_CHAR(byte_str), SECOND_CHAR(byte_str),
-                THIRD_CHAR(byte_str));
+        base64_convert(current_pos, FIRST_CHAR(bytestr), SECOND_CHAR(bytestr),
+                THIRD_CHAR(bytestr));
     }
 
-    switch(len % 3)
+    switch(remainder)
     {
         case 2:
-            base64_convert(FIRST_CHAR(byte_str), SECOND_CHAR(byte_str), 0);
+            base64_convert(current_pos, FIRST_CHAR(bytestr),
+                    SECOND_CHAR(bytestr), 0);
             break;
         case 1:
-            base64_convert(FIRST_CHAR(byte_str), 0, 0);
+            base64_convert(current_pos, FIRST_CHAR(bytestr), 0, 0);
             break;
     }
 
-    putchar('\n');
+    base64[base64_len] = '\0';
+
+    return base64;
 }
 
 #ifdef RUNMAIN
@@ -84,21 +93,29 @@ void base64_encode(const char* byte_str, size_t len)
     {
         /* TODO: eventually read general input from stdin */
         char *small_test = "49276d";
-        char *small_bytestr = utility_hex_to_ascii();
+        char *small_bytestr = utility_hex_to_ascii(small_test);
         size_t small_size = utility_ascii_len(small_test);
         
         if (!small_bytestr) utility_malloc_error();
         
-        base64_encode(small_bytestr, small_size);
+        char *result = base64_encode(small_bytestr, small_size);
+        if (!result) utility_malloc_error();
+        printf("%s\n", result);
+
         free(small_bytestr);
+        free(result);
 
         char *large_test = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d";
-        char *large_bytestr = utility_hex_to_ascii();
+        char *large_bytestr = utility_hex_to_ascii(large_test);
         size_t large_size = utility_ascii_len(large_test);
 
         if (!large_bytestr) utility_malloc_error();
         
-        base64_encode(large_bytestr, small_size);
+        result = base64_encode(large_bytestr, large_size);
+        if (!result) utility_malloc_error();
+        printf("%s\n", result);
+
         free(large_bytestr);
+        free(result);
     }
 #endif
