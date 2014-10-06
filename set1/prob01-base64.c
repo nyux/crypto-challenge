@@ -4,11 +4,6 @@
 
 #include "utility/utility.h"
 
-#define FIRST_CHAR(x) *(x)
-#define SECOND_CHAR(x) *((x) + 1)
-#define THIRD_CHAR(x) *((x) + 2)
-#define FOURTH_CHAR(x) *((x) + 3)
-
 void base64_encode_convert(char *base64_str, char a, char b, char c)
 {
     int output[4];
@@ -59,18 +54,16 @@ char* base64_encode(const char *bytestr, size_t len)
 
     for (int i = 0; i < len - remainder; i += 3, bytestr += 3, current_pos += 4)
     {
-        base64_encode_convert(current_pos, FIRST_CHAR(bytestr), 
-                SECOND_CHAR(bytestr), THIRD_CHAR(bytestr));
+        base64_encode_convert(current_pos, bytestr[0], bytestr[1], bytestr[2]);
     }
 
     switch(remainder)
     {
         case 2:
-            base64_encode_convert(current_pos, FIRST_CHAR(bytestr),
-                    SECOND_CHAR(bytestr), 0);
+            base64_encode_convert(current_pos, bytestr[0], bytestr[1], 0);
             break;
         case 1:
-            base64_encode_convert(current_pos, FIRST_CHAR(bytestr), 0, 0);
+            base64_encode_convert(current_pos, bytestr[0], 0, 0);
             break;
     }
 
@@ -138,9 +131,8 @@ char* base64_decode(const char *base64_str)
     
     for (int i = 0; i < base64_len; i += 4, base64_str += 4, current_pos += 3)
     {
-        base64_decode_convert(current_pos, FIRST_CHAR(base64_str),
-                SECOND_CHAR(base64_str), THIRD_CHAR(base64_str),
-                FOURTH_CHAR(base64_str));
+        base64_decode_convert(current_pos, base64_str[0], base64_str[1],
+                base64_str[2], base64_str[3]);
     }
     
     decoded_str[decoded_len] = '\0'; 
